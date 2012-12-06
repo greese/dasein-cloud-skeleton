@@ -1,4 +1,4 @@
 dasein-cloud-skeleton
-=====================
+===================
 
-Skeleton project for creating a new Dasein Cloud implementation for a currently unsupported cloud
+A skeleton implementation of Dasein Cloud that may be used for creating your own implementations against new clouds.
