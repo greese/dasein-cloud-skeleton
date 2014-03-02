@@ -21,6 +21,7 @@ package org.dasein.cloud.skeleton;
 
 import org.apache.log4j.Logger;
 import org.dasein.cloud.AbstractCloud;
+import org.dasein.cloud.ContextRequirements;
 import org.dasein.cloud.ProviderContext;
 
 import javax.annotation.Nonnull;
@@ -70,6 +71,15 @@ public class MyCloud extends AbstractCloud {
         String name = (ctx == null ? null : ctx.getCloudName());
 
         return (name == null ? "MyCloud" : name);
+    }
+
+    @Override
+    public @Nonnull ContextRequirements getContextRequirements() {
+        // define the information needed to connect to this cloud in the form of context requirements
+        // this skeleton defines a single keypair that any client must provide to the ProviderContext when connecting
+        return new ContextRequirements(
+                new ContextRequirements.Field("apiKey", "The API key used to connect to this cloud", ContextRequirements.FieldType.KEYPAIR, true)
+        );
     }
 
     @Override
