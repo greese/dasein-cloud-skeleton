@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012-2013 Dell, Inc.
+ * Copyright (C) 2012-2015 Dell, Inc.
  * See annotations for authorship information
  *
  * ====================================================================
@@ -23,9 +23,7 @@ import org.apache.log4j.Logger;
 import org.dasein.cloud.CloudException;
 import org.dasein.cloud.InternalException;
 import org.dasein.cloud.ProviderContext;
-import org.dasein.cloud.dc.DataCenter;
-import org.dasein.cloud.dc.DataCenterServices;
-import org.dasein.cloud.dc.Region;
+import org.dasein.cloud.dc.*;
 import org.dasein.cloud.util.APITrace;
 import org.dasein.cloud.util.Cache;
 import org.dasein.cloud.util.CacheLevel;
@@ -45,12 +43,22 @@ import java.util.Locale;
  * @version 2013.01 initial version
  * @since 2013.01
  */
-public class DataCenters implements DataCenterServices {
+public class DataCenters extends AbstractDataCenterServices<MyCloud> {
     static private final Logger logger = MyCloud.getLogger(DataCenters.class);
 
-    private MyCloud provider;
+    DataCenters(@Nonnull MyCloud provider) {
+        super(provider);
+    }
 
-    DataCenters(@Nonnull MyCloud provider) { this.provider = provider; }
+    private transient volatile MyDataCenterCapabilities capabilities;
+
+    @Override
+    public @Nonnull DataCenterCapabilities getCapabilities() throws InternalException, CloudException {
+        if( capabilities == null ) {
+            capabilities = new MyDataCenterCapabilities(getProvider());
+        }
+        return capabilities;
+    }
 
     @Override
     public @Nullable DataCenter getDataCenter(@Nonnull String dataCenterId) throws InternalException, CloudException {
@@ -65,16 +73,6 @@ public class DataCenters implements DataCenterServices {
     }
 
     @Override
-    public @Nonnull String getProviderTermForDataCenter(@Nonnull Locale locale) {
-        return "data center";
-    }
-
-    @Override
-    public @Nonnull String getProviderTermForRegion(@Nonnull Locale locale) {
-        return "region";
-    }
-
-    @Override
     public @Nullable Region getRegion(@Nonnull String providerRegionId) throws InternalException, CloudException {
         for( Region r : listRegions() ) {
             if( providerRegionId.equals(r.getProviderRegionId()) ) {
@@ -86,19 +84,19 @@ public class DataCenters implements DataCenterServices {
 
     @Override
     public @Nonnull Collection<DataCenter> listDataCenters(@Nonnull String providerRegionId) throws InternalException, CloudException {
-        APITrace.begin(provider, "listDataCenters");
+        APITrace.begin(getProvider(), "listDataCenters");
         try {
             Region region = getRegion(providerRegionId);
 
             if( region == null ) {
                 throw new CloudException("No such region: " + providerRegionId);
             }
-            ProviderContext ctx = provider.getContext();
+            ProviderContext ctx = getProvider().getContext();
 
             if( ctx == null ) {
                 throw new NoContextException();
             }
-            Cache<DataCenter> cache = Cache.getInstance(provider, "dataCenters", DataCenter.class, CacheLevel.REGION_ACCOUNT, new TimePeriod<Day>(1, TimePeriod.DAY));
+            Cache<DataCenter> cache = Cache.getInstance(getProvider(), "dataCenters", DataCenter.class, CacheLevel.REGION_ACCOUNT, new TimePeriod<Day>(1, TimePeriod.DAY));
             Collection<DataCenter> dcList = (Collection<DataCenter>)cache.get(ctx);
 
             if( dcList != null ) {
@@ -116,14 +114,14 @@ public class DataCenters implements DataCenterServices {
 
     @Override
     public Collection<Region> listRegions() throws InternalException, CloudException {
-        APITrace.begin(provider, "listRegions");
+        APITrace.begin(getProvider(), "listRegions");
         try {
-            ProviderContext ctx = provider.getContext();
+            ProviderContext ctx = getProvider().getContext();
 
             if( ctx == null ) {
                 throw new NoContextException();
             }
-            Cache<Region> cache = Cache.getInstance(provider, "regions", Region.class, CacheLevel.CLOUD_ACCOUNT, new TimePeriod<Hour>(10, TimePeriod.HOUR));
+            Cache<Region> cache = Cache.getInstance(getProvider(), "regions", Region.class, CacheLevel.CLOUD_ACCOUNT, new TimePeriod<Hour>(10, TimePeriod.HOUR));
             Collection<Region> regions = (Collection<Region>)cache.get(ctx);
 
             if( regions != null ) {
@@ -139,4 +137,5 @@ public class DataCenters implements DataCenterServices {
             APITrace.end();
         }
     }
+
 }

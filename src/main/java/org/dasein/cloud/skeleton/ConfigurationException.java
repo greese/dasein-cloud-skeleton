@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012-2013 Dell, Inc.
+ * Copyright (C) 2012-2015 Dell, Inc.
  * See annotations for authorship information
  *
  * ====================================================================
@@ -19,7 +19,7 @@
 
 package org.dasein.cloud.skeleton;
 
-import org.dasein.cloud.CloudException;
+import org.dasein.cloud.InternalException;
 
 import javax.annotation.Nonnull;
 
@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
  * @version 2013.1 initial version
  * @since 2013.1
  */
-public class ConfigurationException extends CloudException {
+public class ConfigurationException extends InternalException {
     public ConfigurationException(@Nonnull String message) {
         super(message);
     }
