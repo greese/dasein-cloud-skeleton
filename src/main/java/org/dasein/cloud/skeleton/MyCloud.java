@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012-2013 Dell, Inc.
+ * Copyright (C) 2012-2015 Dell, Inc.
  * See annotations for authorship information
  *
  * ====================================================================
@@ -56,10 +56,12 @@ public class MyCloud extends AbstractCloud {
         else {
             pkg = pkg + ".";
         }
+        // don't forget to change category names in log4j.xml if you change it here
         return Logger.getLogger("dasein.cloud.skeleton.std." + pkg + getLastItem(cls.getName()));
     }
 
     static public @Nonnull Logger getWireLogger(@Nonnull Class<?> cls) {
+        // don't forget to change category names in log4j.xml if you change it here
         return Logger.getLogger("dasein.cloud.skeleton.wire." + getLastItem(cls.getPackage().getName()) + "." + getLastItem(cls.getName()));
     }
 
@@ -68,8 +70,7 @@ public class MyCloud extends AbstractCloud {
     @Override
     public @Nonnull String getCloudName() {
         ProviderContext ctx = getContext();
-        String name = (ctx == null ? null : ctx.getCloudName());
-
+        String name = (ctx == null ? null : ctx.getCloud().getCloudName());
         return (name == null ? "MyCloud" : name);
     }
 
@@ -90,8 +91,7 @@ public class MyCloud extends AbstractCloud {
     @Override
     public @Nonnull String getProviderName() {
         ProviderContext ctx = getContext();
-        String name = (ctx == null ? null : ctx.getProviderName());
-
+        String name = (ctx == null ? null : ctx.getCloud().getProviderName());
         return (name == null ? "MyCloud" : name);
     }
 
